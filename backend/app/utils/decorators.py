@@ -4,7 +4,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.models import User, Role
 
 def role_required(required_role):
-    #decorator to check JWT identity, user active/blacklist status, and role.
+    #decorator to check JWT identity, user active/blacklist,  and role.
     def decorator(fn):
         @wraps(fn)
         @jwt_required()
