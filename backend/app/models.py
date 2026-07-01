@@ -54,7 +54,6 @@ class User(UserMixin):
     __tablename__ = "users"                                      # inherited from UserMixin
 
     role = db.Column(db.Enum(Role), nullable=False)
-    is_active = db.Column(db.Boolean, default=True)
     is_blacklisted = db.Column(db.Boolean, default=False)
 
     student_profile = db.relationship("StudentProfile", back_populates="user", uselist=False)
@@ -121,10 +120,7 @@ class PlacementDrive(db.Model):
     company_id = db.Column(db.Integer, db.ForeignKey("company_profiles.id"), nullable=False)
     job_title = db.Column(db.String(200), nullable=False)
     job_description = db.Column(db.Text, nullable=True)
-    skills_required = db.Column(db.String(300), nullable=True)
-    eligible_branch = db.Column(db.String(100), nullable=True)
-    eligible_years = db.Column(db.String(20), nullable=True)
-    min_cgpa = db.Column(db.Float, default=0.0)
+    eligibility_criteria = db.Column(db.Text, nullable=True)
     salary_lpa = db.Column(db.Float, nullable=True)
     application_deadline = db.Column(db.Date, nullable=False)
     drive_date = db.Column(db.Date, nullable=True)
@@ -154,6 +150,7 @@ class Application(db.Model):
     applied_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     interview_date = db.Column(db.DateTime, nullable=True)
     feedback = db.Column(db.Text, nullable=True)
+    history = db.Column(db.JSON, default=list)
     updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     __table_args__ = (db.UniqueConstraint("student_id", "drive_id", name="uq_student_drive"),)
