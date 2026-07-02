@@ -13,7 +13,7 @@ const StudentDashboard = {
       <!-- Profile -->
       <div v-if="tab === 'profile'">
 
-        <h3>Update Profile</h3>
+        <h3>My Profile</h3>
 
         <form @submit.prevent="updateProfile">
 
@@ -31,16 +31,16 @@ const StudentDashboard = {
 
           <div>
             <input
-              type="number"
               v-model="profile.year"
+              type="number"
               placeholder="Year">
           </div>
 
           <div>
             <input
+              v-model="profile.cgpa"
               type="number"
               step="0.1"
-              v-model="profile.cgpa"
               placeholder="CGPA">
           </div>
 
@@ -58,7 +58,7 @@ const StudentDashboard = {
           </div>
 
           <button type="submit">
-            Update Profile
+            Save
           </button>
 
         </form>
@@ -76,25 +76,21 @@ const StudentDashboard = {
       <!-- Drives -->
       <div v-if="tab === 'drives'">
 
-        <h3>Available Drives</h3>
+        <h3>Placement Drives</h3>
 
         <div
           v-for="drive in drives"
           :key="drive.id">
 
-          <h4>
-            {{ drive.job_title }}
-            - {{ drive.company_name }}
-          </h4>
+          <h4>{{ drive.job_title }}</h4>
+
+          <p>Company: {{ drive.company_name }}</p>
 
           <p>{{ drive.job_description }}</p>
 
           <p>Salary: {{ drive.salary_lpa }} LPA</p>
 
-          <p>
-            Deadline:
-            {{ drive.application_deadline }}
-          </p>
+          <p>Deadline: {{ drive.application_deadline }}</p>
 
           <button
             v-if="!hasApplied(drive.id)"
@@ -105,7 +101,7 @@ const StudentDashboard = {
           </button>
 
           <span v-else>
-            Already Applied
+            Applied
           </span>
 
           <hr>
@@ -119,25 +115,46 @@ const StudentDashboard = {
 
         <h3>My Applications</h3>
 
-        <table border="1">
+        <div
+          v-for="app in applications"
+          :key="app.id">
 
-          <tr>
-            <th>Job</th>
-            <th>Company</th>
-            <th>Status</th>
-          </tr>
+          <h4>
+            {{ app.job_title }}
+            - {{ app.company_name }}
+          </h4>
 
-          <tr
-            v-for="app in applications"
-            :key="app.id">
+          <p>Status: {{ app.status }}</p>
 
-            <td>{{ app.job_title }}</td>
-            <td>{{ app.company_name }}</td>
-            <td>{{ app.status }}</td>
+          <div v-if="app.logs && app.logs.length">
 
-          </tr>
+            <p>History:</p>
 
-        </table>
+            <ul>
+              <li
+                v-for="(log, index) in app.logs"
+                :key="index">
+
+                {{ log.changed_at }} :
+
+                <span v-if="log.status_from">
+                  {{ log.status_from }} →
+                </span>
+
+                {{ log.status_to }}
+
+              </li>
+            </ul>
+
+          </div>
+
+          <hr>
+
+        </div>
+
+        <p v-if="applications.length === 0">
+          No applications yet.
+        </p>
 
       </div>
 
@@ -216,36 +233,12 @@ const StudentDashboard = {
 
       const formData = new FormData();
 
-      formData.append(
-        "roll_number",
-        this.profile.roll_number
-      );
-
-      formData.append(
-        "branch",
-        this.profile.branch
-      );
-
-      formData.append(
-        "year",
-        this.profile.year
-      );
-
-      formData.append(
-        "cgpa",
-        this.profile.cgpa
-      );
-
-      formData.append(
-        "skills",
-        this.profile.skills
-      );
+      for (const key in this.profile) {
+        formData.append(key, this.profile[key]);
+      }
 
       if (this.resumeFile) {
-        formData.append(
-          "resume",
-          this.resumeFile
-        );
+        formData.append("resume", this.resumeFile);
       }
 
       const res = await fetch(
@@ -280,7 +273,7 @@ const StudentDashboard = {
       );
 
       if (res.ok) {
-        alert("Application submitted");
+        alert("Applied successfully");
         this.fetchDashboard();
       }
     }

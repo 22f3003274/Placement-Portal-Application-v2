@@ -44,7 +44,8 @@ def student_dashboard():
             "job_title": a.drive.job_title if a.drive else "Unknown",
             "company_name": a.drive.company.company_name if a.drive and a.drive.company else "Unknown",
             "status": a.status.value,
-            "applied_at": str(a.applied_at)
+            "applied_at": str(a.applied_at),
+            "logs": a.history or []
         } for a in applications],
         "notifications": [
             {"message": f"Your application for {a.drive.job_title} is: {a.status.value.upper()}"}
@@ -65,7 +66,20 @@ def apply_drive(drive_id):
     if Application.query.filter_by(student_id=student.id, drive_id=drive_id).first():
         return jsonify({"error": "Already applied"}), 409
 
-    db.session.add(Application(student_id=student.id, drive_id=drive_id))
+    from datetime import datetime, timezone
+    history_entry = {
+        "status_from": None,
+        "status_to": ApplicationStatus.APPLIED.value,
+        "changed_at": str(datetime.now(timezone.utc)),
+        "notes": "Student applied."
+    }
+
+    new_app = Application(
+        student_id=student.id, 
+        drive_id=drive_id,
+        history=[history_entry]
+    )
+    db.session.add(new_app)
     db.session.commit()
     return jsonify({"message": "Applied successfully"}), 201
 
