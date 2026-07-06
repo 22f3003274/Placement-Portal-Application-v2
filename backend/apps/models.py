@@ -1,4 +1,4 @@
-from app.extensions import db
+from apps.extensions import db
 from enum import Enum
 from datetime import datetime, timezone
 from werkzeug.security import generate_password_hash, check_password_hash

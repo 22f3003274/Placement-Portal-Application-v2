@@ -1,8 +1,8 @@
 from flask import Flask
-from app.config import Config
 from flask_cors import CORS
-from app.extensions import db, jwt
-
+from apps.config import Config
+from apps.extensions import db, jwt, celery
+from apps.models import User, Role
 
 def create_app():
     app = Flask(__name__)
@@ -13,37 +13,46 @@ def create_app():
     db.init_app(app)
     jwt.init_app(app)
 
-    # Register blueprints
-    from app.routes.auth import auth_bp
-    from app.routes.admin import admin_bp
-    app.register_blueprint(auth_bp, url_prefix="/api/auth")
-    app.register_blueprint(admin_bp, url_prefix="/api/admin")
+    from apps.routes.auth_routes import auth_bp
+    from apps.routes.admin_routes import admin_bp
+    from apps.routes.company_routes import company_bp
+    from apps.routes.student_routes import student_bp
+
+    app.register_blueprint(auth_bp,url_prefix="/api/auth")
+    app.register_blueprint(admin_bp,url_prefix="/api/admin")
+    app.register_blueprint(company_bp,url_prefix="/api/company")
+    app.register_blueprint(student_bp,url_prefix="/api/student")
 
     with app.app_context():
-        from app.models import User, Role
         db.create_all()
-        print("Database tables created.")
-        _seed_admin(User, Role)
+        create_admin()
+
+    celery.conf.update(app.config)
+
+    class ContextTask(celery.Task):
+        def __call__(self, *args, **kwargs):
+            with app.app_context():
+                return self.run(*args, **kwargs)
+
+    celery.Task = ContextTask
+
+    from apps import tasks
 
     return app
 
 
-def _seed_admin(User, Role):
-    existing = User.query.filter_by(role=Role.ADMIN).first()
-
-    if not existing:
-        admin = User(name="Admin", email="admin@ppa.com", role=Role.ADMIN, is_active=True, is_blacklisted=False)
-        admin.set_password("admin")
+def create_admin():
+    admin = User.query.filter_by(role=Role.ADMIN).first()
+    if not admin:
+        admin = User(name="Admin", email="a@a.com", role=Role.ADMIN)
+        admin.set_password("a")
         db.session.add(admin)
         db.session.commit()
-
-        print("Admin user created: admin@ppa.com / admin")
-
-    else:
-        print("Admin already exists: admin@ppa.com / admin")
+        print("Admin created")
 
 
 app = create_app()
 
 if __name__ == "__main__":
     app.run(debug=True)
+

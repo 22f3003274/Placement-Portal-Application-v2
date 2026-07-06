@@ -1,270 +1,286 @@
 const AdminDashboard = {
   components: { DashboardLayout },
+
   template: `
-    <DashboardLayout title="Admin Panel">
-      <div>
-        <div>
-          <ul>
-            <li>
-              <a :class="{ active: tab === 'stats' }" @click.prevent="tab = 'stats'" href="#">Stats</a>
-            </li>
-            <li>
-              <a :class="{ active: tab === 'studs' }" @click.prevent="tab = 'studs'" href="#">Students</a>
-            </li>
-            <li>
-              <a :class="{ active: tab === 'comps' }" @click.prevent="tab = 'comps'" href="#">Companies</a>
-            </li>
-            <li>
-              <a :class="{ active: tab === 'drives' }" @click.prevent="tab = 'drives'" href="#">Placement Drives</a>
-            </li>
-            <li>
-              <a :class="{ active: tab === 'apps' }" @click.prevent="tab = 'apps'" href="#">Applications</a>
-            </li>
-          </ul>
-        </div>
-      </div>
+    <DashboardLayout title="Admin Dashboard">
+
+      <button @click="tab = 'stats'">Stats</button>
+      <button @click="tab = 'students'">Students</button>
+      <button @click="tab = 'companies'">Companies</button>
+      <button @click="tab = 'drives'">Drives</button>
+      <button @click="tab = 'applications'">Applications</button>
+
+      <hr>
 
       <div v-if="tab === 'stats'">
-        <div>
-          <div>
-            <div>
-              <h5>Students</h5>
-              <h2>{{ st.students }}</h2>
-            </div>
-          </div>
-          <div>
-            <div>
-              <h5>Companies</h5>
-              <h2>{{ st.companies }}</h2>
-            </div>
-          </div>
-          <div>
-            <div>
-              <h5>Placement Drives</h5>
-              <h2>{{ st.drives }}</h2>
-            </div>
-          </div>
-          <div>
-            <div>
-              <h5>Applications</h5>
-              <h2>{{ st.applications }}</h2>
-            </div>
-          </div>
-        </div>
+        <h3>Statistics</h3>
+
+        <p>Students: {{ stats.students }}</p>
+        <p>Companies: {{ stats.companies }}</p>
+        <p>Drives: {{ stats.drives }}</p>
+        <p>Applications: {{ stats.applications }}</p>
+
       </div>
 
-      <div v-if="tab === 'studs'">
-        <div>
-          <input v-model="s_search" placeholder="Search by name/email/phone/roll number" />
-          <button @click="getStuds">Search</button>
-        </div>
-        <table>
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Roll No.</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="s in studs" :key="s.id">
-              <td>{{ s.name }}</td>
-              <td>{{ s.email }}</td>
-              <td>{{ s.roll_number || 'N/A' }}</td>
-              <td>
-                <span v-if="s.is_blacklisted">Blacklisted</span>
-                <span v-else>Active</span>
-              </td>
-              <td>
-                <button @click="blk(s.id)">
-                  {{ s.is_blacklisted ? 'Unblacklist' : 'Blacklist' }}
-                </button>
-              </td>
-            </tr>
-          </tbody>
+
+      <div v-if="tab === 'students'">
+        <h3>Students</h3>
+
+        <input v-model="studentSearch" placeholder="Search student" >
+        <button @click="getStudents">Search</button>
+        <br><br>
+
+        <table border="1">
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Roll Number</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+
+          <tr v-for="student in students" :key="student.id">
+            <td>{{ student.name }}</td>
+            <td>{{ student.email }}</td>
+            <td>{{ student.roll_number }}</td>
+
+            <td>
+              {{ student.is_blacklisted ? "Blacklisted" : "Active" }}
+            </td>
+
+            <td>
+              <button @click="blacklist(student.id)">
+                {{ student.is_blacklisted ? 'Unblacklist' : 'Blacklist' }}
+              </button>
+            </td>
+
+          </tr>
         </table>
       </div>
 
-      <div v-if="tab === 'comps'">
-        <div>
-          <input v-model="c_search" placeholder="Search by company name" />
-          <button @click="getComps">Search</button>
-        </div>
-        <table>
-          <thead>
-            <tr>
-              <th>Company Name</th>
-              <th>Website</th>
-              <th>Approval</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="c in comps" :key="c.id">
-              <td>{{ c.company_name }}</td>
-              <td>{{ c.website || 'N/A' }}</td>
-              <td>
-                <span v-if="c.approval_status === 'pending'">Pending</span>
-                <span v-if="c.approval_status === 'approved'">Approved</span>
-                <span v-if="c.approval_status === 'rejected'">Rejected</span>
-              </td>
-              <td>
-                <span v-if="c.is_blacklisted">Blacklisted</span>
-                <span v-else>Good Standing</span>
-              </td>
-              <td>
-                <button @click="chComp(c.id, 'approved')" v-if="c.approval_status !== 'approved'">Approve</button>
-                <button @click="chComp(c.id, 'rejected')" v-if="c.approval_status !== 'rejected'">Reject</button>
-                <button @click="blk(c.user_id)">{{ c.is_blacklisted ? 'Unblacklist' : 'Blacklist' }}</button>
-              </td>
-            </tr>
-          </tbody>
+
+      <div v-if="tab === 'companies'"> 
+        <h3>Companies</h3>
+
+        <input v-model="companySearch" placeholder="Search company">
+        <button @click="getCompanies">Search</button>
+        <br><br>
+
+        <table border="1">
+          <tr>
+            <th>Company</th>
+            <th>Website</th>
+            <th>Approval</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+
+          <tr v-for="company in companies" :key="company.id">
+            <td>{{ company.company_name }}</td>
+            <td>{{ company.website }}</td>
+            <td>{{ company.approval_status }}</td>
+
+            <td>
+              {{ company.is_blacklisted ? "Blacklisted" : "Active" }}
+            </td>
+
+            <td>
+              <button v-if="company.approval_status !== 'approved'" @click="changeCompanyStatus(company.id, 'approved')"> Approve </button>
+              <button v-else disabled> Approved </button>
+
+              <button v-if="company.approval_status !== 'rejected'" @click="changeCompanyStatus(company.id, 'rejected')"> Reject </button>
+              <button v-else disabled> Rejected </button>
+
+              <button @click="blacklist(company.user_id)">
+                {{ company.is_blacklisted ? 'Unblacklist' : 'Blacklist' }}
+              </button>
+            </td>
+
+          </tr>
         </table>
       </div>
+
 
       <div v-if="tab === 'drives'">
-        <table>
-          <thead>
-            <tr>
-              <th>Company</th>
-              <th>Job Title</th>
-              <th>Salary (LPA)</th>
-              <th>Deadline</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="d in drives" :key="d.id">
-              <td>{{ d.company_name }}</td>
-              <td>{{ d.job_title }}</td>
-              <td>{{ d.salary_lpa || 'N/A' }}</td>
-              <td>{{ d.application_deadline }}</td>
-              <td>
-                <span v-if="d.status === 'pending'">Pending</span>
-                <span v-if="d.status === 'approved'">Approved</span>
-                <span v-if="d.status === 'rejected'">Rejected</span>
-                <span v-if="d.status === 'closed'">Closed</span>
-              </td>
-              <td>
-                <button @click="chDrive(d.id, 'approved')" v-if="d.status === 'pending'">Approve</button>
-                <button @click="chDrive(d.id, 'rejected')" v-if="d.status === 'pending'">Reject</button>
-                <button @click="chDrive(d.id, 'closed')" v-if="d.status === 'approved'">Close</button>
-              </td>
-            </tr>
-          </tbody>
+        <h3>Placement Drives</h3>
+
+        <table border="1">
+          <tr>
+            <th>Company</th>
+            <th>Job Title</th>
+            <th>Salary</th>
+            <th>Deadline</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+
+          <tr v-for="drive in drives" :key="drive.id">
+
+            <td>{{ drive.company_name }}</td>
+            <td>{{ drive.job_title }}</td>
+            <td>{{ drive.salary_lpa }}</td>
+            <td>{{ drive.application_deadline }}</td>
+            <td>{{ drive.status }}</td>
+
+            <td>
+              <button v-if="drive.status !== 'approved'" @click="changeDriveStatus(drive.id, 'approved')"> Approve </button>
+              <button v-else disabled> Approved </button>
+
+              <button v-if="drive.status !== 'rejected'" @click="changeDriveStatus(drive.id, 'rejected')"> Reject </button>
+              <button v-else disabled> Rejected </button>
+
+              <button v-if="drive.status !== 'closed'" @click="changeDriveStatus(drive.id, 'closed')"> Close </button>
+              <button v-else disabled> Closed </button>
+            </td>
+
+          </tr>
         </table>
       </div>
 
-      <div v-if="tab === 'apps'">
-        <table>
-          <thead>
-            <tr>
-              <th>Student</th>
-              <th>Company</th>
-              <th>Job Title</th>
-              <th>Status</th>
-              <th>Applied At</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(a, i) in apps" :key="i">
-              <td>{{ a.student_name }}</td>
-              <td>{{ a.company_name }}</td>
-              <td>{{ a.job_title }}</td>
-              <td><span>{{ a.status }}</span></td>
-              <td>{{ a.applied_at }}</td>
-            </tr>
-          </tbody>
+
+      <div v-if="tab === 'applications'">
+        <h3>Applications</h3>
+
+        <table border="1">
+          <tr>
+            <th>Student</th>
+            <th>Company</th>
+            <th>Job</th>
+            <th>Status</th>
+            <th>Applied At</th>
+          </tr>
+
+          <tr v-for="application in applications" :key="application.id">
+            <td>{{ application.student_name }}</td>
+            <td>{{ application.company_name }}</td>
+            <td>{{ application.job_title }}</td>
+            <td>{{ application.status }}</td>
+            <td>{{ application.applied_at }}</td>
+
+          </tr>
+
         </table>
       </div>
     </DashboardLayout>
   `,
+
   data() {
     return {
       tab: "stats",
-      st: {},
-      studs: [],
-      comps: [],
+
+      stats: {},
+      students: [],
+      companies: [],
       drives: [],
-      apps: [],
-      s_search: "",
-      c_search: ""
+      applications: [],
+      studentSearch: "",
+      companySearch: ""
     };
   },
+
   methods: {
-    async getSt() {
-      const r = await fetch(API + "/admin/stats", {
-        headers: { "Authorization": "Bearer " + userAuth.getTok() }
+    async getStats() {
+      const response = await fetch(API + "/admin/stats", {
+        headers: { Authorization: "Bearer " + localStorage.getItem("token") }
       });
-      this.st = await r.json();
-    },
-    async getStuds() {
-      const r = await fetch(API + "/admin/students?search=" + this.s_search, {
-        headers: { "Authorization": "Bearer " + userAuth.getTok() }
-      });
-      this.studs = await r.json();
-    },
-    async getComps() {
-      const r = await fetch(API + "/admin/companies?search=" + this.c_search, {
-        headers: { "Authorization": "Bearer " + userAuth.getTok() }
-      });
-      this.comps = await r.json();
-    },
-    async getDrives() {
-      const r = await fetch(API + "/admin/drives", {
-        headers: { "Authorization": "Bearer " + userAuth.getTok() }
-      });
-      this.drives = await r.json();
-    },
-    async getApps() {
-      const r = await fetch(API + "/admin/applications", {
-        headers: { "Authorization": "Bearer " + userAuth.getTok() }
-      });
-      this.apps = await r.json();
+      this.stats = await response.json();
     },
 
-    async blk(uid) {
-      await fetch(API + "/admin/users/" + uid + "/toggle-blacklist", {
-        method: "POST",
-        headers: { "Authorization": "Bearer " + userAuth.getTok() }
-      });
-      this.getStuds();
-      this.getComps();
+
+    async getStudents() {
+      const response = await fetch(
+        API + "/admin/students?search=" + this.studentSearch,
+        {
+          headers: { Authorization: "Bearer " + localStorage.getItem("token") }
+        }
+      );
+
+      this.students = await response.json();
     },
-    async chComp(cid, st) {
-      await fetch(API + "/admin/companies/" + cid + "/status", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Bearer " + userAuth.getTok()
-        },
-        body: JSON.stringify({ status: st })
-      });
-      this.getComps();
-      this.getSt();
+
+
+    async getCompanies() {
+      const response = await fetch(
+        API + "/admin/companies?search=" + this.companySearch,
+        {
+          headers: { Authorization: "Bearer " + localStorage.getItem("token") }
+        }
+      );
+
+      this.companies = await response.json();
     },
-    async chDrive(did, st) {
-      await fetch(API + "/admin/drives/" + did + "/status", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Bearer " + userAuth.getTok()
-        },
-        body: JSON.stringify({ status: st })
+
+
+    async getDrives() {
+      const response = await fetch(API + "/admin/drives", {
+        headers: { Authorization: "Bearer " + localStorage.getItem("token") }
       });
+      this.drives = await response.json();
+    },
+
+
+    async getApplications() {
+      const response = await fetch(API + "/admin/applications", {
+        headers: { Authorization: "Bearer " + localStorage.getItem("token") }
+      });
+
+      this.applications = await response.json();
+    },
+
+
+    async blacklist(userId) {
+      await fetch(
+        API + "/admin/users/" + userId + "/toggle-blacklist",
+        {
+          method: "POST",
+          headers: { Authorization: "Bearer " + localStorage.getItem("token") }
+        }
+      );
+      this.getStudents();
+      this.getCompanies();
+    },
+
+
+    async changeCompanyStatus(companyId, status) {
+      await fetch(
+        API + "/admin/companies/" + companyId + "/status",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + localStorage.getItem("token")
+          },
+          body: JSON.stringify({ status: status })
+        }
+      );
+      this.getCompanies();
+      this.getStats();
+    },
+
+
+    async changeDriveStatus(driveId, status) {
+      await fetch(
+        API + "/admin/drives/" + driveId + "/status",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + localStorage.getItem("token")
+          },
+          body: JSON.stringify({ status: status })
+        }
+      );
       this.getDrives();
-      this.getSt();
+      this.getStats();
     }
   },
+
   mounted() {
-    this.getSt();
-    this.getStuds();
-    this.getComps();
+    this.getStats();
+    this.getStudents();
+    this.getCompanies();
     this.getDrives();
-    this.getApps();
+    this.getApplications();
   }
 };
+
