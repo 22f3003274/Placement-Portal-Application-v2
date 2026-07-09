@@ -3,7 +3,7 @@ from flask_jwt_extended import get_jwt_identity
 from werkzeug.utils import secure_filename
 from datetime import date, datetime, timezone
 import os
-from apps.extensions import db
+from apps.extensions import db, cache
 from apps.models import (User, StudentProfile, PlacementDrive, Application, DriveStatus, ApplicationStatus)
 from apps.routes.auth_routes import student_required
 
@@ -16,6 +16,7 @@ ALLOWED_EXTENSIONS = {"pdf", "doc", "docx"}
 
 @student_bp.route("/dashboard")
 @student_required
+@cache.cached(timeout=60, query_string=True)
 def dashboard():
 
     user_id = int(get_jwt_identity())
@@ -87,6 +88,7 @@ def apply(drive_id):
     application = Application(student_id=student.id,drive_id=drive_id,history=history)
     db.session.add(application)
     db.session.commit()
+    cache.clear()
 
     return jsonify({"message": "Applied successfully"}), 201
 

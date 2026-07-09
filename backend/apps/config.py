@@ -15,4 +15,8 @@ class Config:
     MAIL_PORT = 1025
     MAIL_USE_TLS = False
     MAIL_USE_SSL = False
-    MAIL_DEFAULT_SENDER = 'noreply@ppa.local'
+    MAIL_DEFAULT_SENDER = 'ppa@ppa.com'
+
+    CACHE_TYPE = 'RedisCache'
+    CACHE_REDIS_URL = 'redis://localhost:6379/0'
+    CACHE_DEFAULT_TIMEOUT = 60

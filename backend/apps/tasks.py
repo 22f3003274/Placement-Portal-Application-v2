@@ -15,7 +15,7 @@ celery.conf.beat_schedule = {
     },
     "monthly-report": {
         "task": "apps.tasks.generate_monthly_report",
-        "schedule": crontab(day_of_month=1, hour=9, minute=0)
+        "schedule": crontab(day_of_month=1, hour=8, minute=0)
     }
 }
 
@@ -41,9 +41,9 @@ def send_interview_reminders():
 
 @celery.task
 def generate_monthly_report():
-    from apps.models import CompanyProfile, DriveStatus
+    from apps.models import CompanyProfile, DriveStatus, ApprovalStatus
     
-    companies = CompanyProfile.query.filter_by(approval_status='approved').all()
+    companies = CompanyProfile.query.filter_by(approval_status=ApprovalStatus.APPROVED).all()
     count = 0
     os.makedirs("static/exports", exist_ok=True)
     

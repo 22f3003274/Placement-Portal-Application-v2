@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import get_jwt_identity
 from datetime import datetime, timezone
 from sqlalchemy.orm.attributes import flag_modified
-from apps.extensions import db
+from apps.extensions import db, cache
 from apps.models import (CompanyProfile, PlacementDrive, Application, ApprovalStatus, DriveStatus, ApplicationStatus)
 from apps.routes.auth_routes import company_required
 
@@ -11,6 +11,7 @@ company_bp = Blueprint("company", __name__)
 
 @company_bp.route("/dashboard")
 @company_required
+@cache.cached(timeout=60, query_string=True)
 def dashboard():
 
     user_id = int(get_jwt_identity())
@@ -65,6 +66,7 @@ def create_drive():
     )
     db.session.add(drive)
     db.session.commit()
+    cache.clear()
     return jsonify({"message": "Drive created"}), 201
 
 
@@ -77,11 +79,13 @@ def close_drive(drive_id):
     drive = PlacementDrive.query.filter_by(id=drive_id, company_id=company.id).first_or_404()
     drive.status = DriveStatus.CLOSED
     db.session.commit()
+    cache.clear()
     return jsonify({"message": "Drive closed"})
 
 
 @company_bp.route("/drive/<int:drive_id>/applications")
 @company_required
+@cache.cached(timeout=60, query_string=True)
 def applications(drive_id):
 
     user_id = int(get_jwt_identity())

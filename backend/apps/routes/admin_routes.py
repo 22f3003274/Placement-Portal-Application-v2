@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from apps.extensions import db
+from apps.extensions import db, cache
 from apps.models import User,Role,StudentProfile,CompanyProfile,PlacementDrive,Application,ApprovalStatus,DriveStatus
 from apps.routes.auth_routes import admin_required
 
@@ -8,6 +8,7 @@ admin_bp = Blueprint("admin", __name__)
 
 @admin_bp.route("/stats")
 @admin_required
+@cache.cached(timeout=60, query_string=True)
 def stats():
 
     return jsonify({
@@ -20,6 +21,7 @@ def stats():
 
 @admin_bp.route("/students")
 @admin_required
+@cache.cached(timeout=60, query_string=True)
 def students():
 
     search = request.args.get("search", "")
@@ -46,6 +48,7 @@ def students():
 
 @admin_bp.route("/companies")
 @admin_required
+@cache.cached(timeout=60, query_string=True)
 def companies():
 
     search = request.args.get("search", "")
@@ -68,6 +71,7 @@ def companies():
 
 @admin_bp.route("/drives")
 @admin_required
+@cache.cached(timeout=60, query_string=True)
 def drives():
 
     drives = []
@@ -85,6 +89,7 @@ def drives():
 
 @admin_bp.route("/applications")
 @admin_required
+@cache.cached(timeout=60, query_string=True)
 def applications():
 
     applications = []
@@ -108,6 +113,7 @@ def company_status(company_id):
     data = request.get_json()
     company.approval_status = ApprovalStatus(data["status"])
     db.session.commit()
+    cache.clear()
     return jsonify({"message": "Company status updated"})
 
 
@@ -119,6 +125,7 @@ def drive_status(drive_id):
     data = request.get_json()
     drive.status = DriveStatus(data["status"])
     db.session.commit()
+    cache.clear()
     return jsonify({"message": "Drive status updated"})
 
 
@@ -129,5 +136,6 @@ def blacklist(user_id):
     user = User.query.get_or_404(user_id)
     user.is_blacklisted = not user.is_blacklisted
     db.session.commit()
+    cache.clear()
     return jsonify({"message": "Blacklist updated"})
 

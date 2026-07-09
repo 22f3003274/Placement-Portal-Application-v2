@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from functools import wraps
-from apps.extensions import db
+from apps.extensions import db, cache
 from apps.models import User, Role, StudentProfile, CompanyProfile, ApprovalStatus
 
 
@@ -72,6 +72,7 @@ def register_student():
     student = StudentProfile(user_id=user.id)
     db.session.add(student)
     db.session.commit()
+    cache.clear()
 
     return jsonify({"message": "Registration successful"}), 201
 
@@ -95,6 +96,7 @@ def register_company():
     )
     db.session.add(company)
     db.session.commit()
+    cache.clear()
 
     return jsonify({"message": "Registration submitted for approval"}), 201
 
