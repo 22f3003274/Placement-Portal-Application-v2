@@ -21,6 +21,8 @@ const CompanyDashboard = {
 
           <p>Total Drives: {{ total_drives }}</p>
           <p>Total Applications: {{ total_applications }}</p>
+          <br>
+          <button @click="exportHistory">Export Application History (CSV)</button>
 
         </div>
 
@@ -219,6 +221,34 @@ const CompanyDashboard = {
       if (option === 'rejected')
         return false;
       return flow[option] < flow[current];
+    },
+
+    async exportHistory() {
+      const res = await fetch(API + "/company/export-history", {
+        method: "POST",
+        headers: { Authorization: "Bearer " + localStorage.getItem("token") }
+      });
+      const data = await res.json();
+      if (!data.task_id) return alert("Failed to start export.");
+      
+      alert("CSV Export started. Please wait, you will be prompted to download once complete.");
+      
+      const checkStatus = async () => {
+        const statusRes = await fetch(API + "/company/task-status/" + data.task_id, {
+          headers: { Authorization: "Bearer " + localStorage.getItem("token") }
+        });
+        const statusData = await statusRes.json();
+        if (statusData.state === "SUCCESS") {
+          window.open(API.replace('/api', '') + statusData.file_url, "_blank");
+          alert("Export complete!");
+        } else if (statusData.state === "FAILURE") {
+          alert("Export failed.");
+        } else {
+          setTimeout(checkStatus, 2000);
+        }
+      };
+      
+      checkStatus();
     }
   },
 

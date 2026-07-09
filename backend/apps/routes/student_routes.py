@@ -124,9 +124,16 @@ def update_profile():
 @student_bp.route("/export-history", methods=["POST"])
 @student_required
 def export_history():
-
     from apps.tasks import export_csv_data
     user_id = int(get_jwt_identity())
-    export_csv_data.delay(user_id,"student")
+    task = export_csv_data.delay(user_id,"student")
+    return jsonify({"message": "CSV export started", "task_id": task.id}), 202
 
-    return jsonify({"message": "CSV export started"}), 202
+@student_bp.route("/task-status/<task_id>")
+@student_required
+def task_status(task_id):
+    from apps.celery_workers import celery
+    task = celery.AsyncResult(task_id)
+    if task.state == "SUCCESS":
+        return jsonify({"state": task.state, "file_url": "/" + task.result})
+    return jsonify({"state": task.state})

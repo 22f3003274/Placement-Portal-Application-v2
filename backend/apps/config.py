@@ -10,3 +10,9 @@ class Config:
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=1)
 
     DEBUG = True
+
+    MAIL_SERVER = '127.0.0.1'
+    MAIL_PORT = 1025
+    MAIL_USE_TLS = False
+    MAIL_USE_SSL = False
+    MAIL_DEFAULT_SENDER = 'noreply@ppa.local'

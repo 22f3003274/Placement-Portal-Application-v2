@@ -12,6 +12,7 @@ const StudentDashboard = {
 
       <div v-if="tab === 'profile'">
         <h3>My Profile</h3>
+        <button @click="exportHistory" style="margin-bottom: 15px;">Export Application History (CSV)</button>
 
         <form @submit.prevent="updateProfile">
 
@@ -159,6 +160,34 @@ const StudentDashboard = {
         const errorData = await response.json();
         alert(errorData.error || "Failed to apply");
       }
+    },
+
+    async exportHistory() {
+      const res = await fetch(API + "/student/export-history", {
+        method: "POST",
+        headers: { Authorization: "Bearer " + localStorage.getItem("token") }
+      });
+      const data = await res.json();
+      if (!data.task_id) return alert("Failed to start export.");
+      
+      alert("CSV Export started. Please wait, you will be prompted to download once complete.");
+      
+      const checkStatus = async () => {
+        const statusRes = await fetch(API + "/student/task-status/" + data.task_id, {
+          headers: { Authorization: "Bearer " + localStorage.getItem("token") }
+        });
+        const statusData = await statusRes.json();
+        if (statusData.state === "SUCCESS") {
+          window.open(API.replace('/api', '') + statusData.file_url, "_blank");
+          alert("Export complete!");
+        } else if (statusData.state === "FAILURE") {
+          alert("Export failed.");
+        } else {
+          setTimeout(checkStatus, 2000);
+        }
+      };
+      
+      checkStatus();
     }
   },
 

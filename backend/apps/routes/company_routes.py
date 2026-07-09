@@ -142,10 +142,17 @@ def update_status(app_id):
 @company_bp.route("/export-history", methods=["POST"])
 @company_required
 def export_history():
-
     from apps.tasks import export_csv_data
     user_id = int(get_jwt_identity())
     company = CompanyProfile.query.filter_by(user_id=user_id).first()
-    export_csv_data.delay(company.id, "company")
+    task = export_csv_data.delay(company.id, "company")
+    return jsonify({"message": "CSV export started", "task_id": task.id}), 202
 
-    return jsonify({"message": "CSV export started"}), 202
+@company_bp.route("/task-status/<task_id>")
+@company_required
+def task_status(task_id):
+    from apps.celery_workers import celery
+    task = celery.AsyncResult(task_id)
+    if task.state == "SUCCESS":
+        return jsonify({"state": task.state, "file_url": "/" + task.result})
+    return jsonify({"state": task.state})

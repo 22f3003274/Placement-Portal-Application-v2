@@ -1,7 +1,8 @@
 from flask import Flask
 from flask_cors import CORS
 from apps.config import Config
-from apps.extensions import db, jwt, celery
+from apps.extensions import db, jwt, mail
+from apps.celery_workers import celery
 from apps.models import User, Role
 
 def create_app():
@@ -12,6 +13,7 @@ def create_app():
 
     db.init_app(app)
     jwt.init_app(app)
+    mail.init_app(app)
 
     from apps.routes.auth_routes import auth_bp
     from apps.routes.admin_routes import admin_bp
