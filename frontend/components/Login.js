@@ -19,7 +19,7 @@ const Login = {
       <hr>
 
       <a href="#/register-student">Student Registration</a>
-      <br>
+      <br><br>
       <a href="#/register-company">Company Registration</a>
 
     </div>

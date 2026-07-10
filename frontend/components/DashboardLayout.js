@@ -5,9 +5,7 @@ const DashboardLayout = {
     <div class="container mt-4">
       <h2>{{ title }}</h2>
 
-      <p>
-        Hello, {{ user.name }}
-      </p>
+      <p>Hello, {{ user.name }} </p>
 
       <button @click="logout"> Logout </button>
 
