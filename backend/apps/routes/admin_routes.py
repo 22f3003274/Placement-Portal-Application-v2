@@ -28,9 +28,9 @@ def students():
     query = User.query.filter_by(role=Role.STUDENT)
     if search:
         query = query.outerjoin(StudentProfile).filter(
-            (User.name.like(f"%{search}%")) |
-            (User.email.like(f"%{search}%")) |
-            (StudentProfile.roll_number.like(f"%{search}%"))
+            User.name.like(f"%{search}%")
+            | User.email.like(f"%{search}%")
+            | StudentProfile.roll_number.like(f"%{search}%")
         )
 
     students = []

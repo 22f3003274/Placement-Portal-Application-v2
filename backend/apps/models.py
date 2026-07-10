@@ -35,7 +35,7 @@ class ApplicationStatus(Enum):
 
 
 class UserMixin(db.Model):      
-    __abstract__ = True                                          # abstract base model
+    __abstract__ = True                                      
 
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
@@ -49,9 +49,12 @@ class UserMixin(db.Model):
     def check_password(self, raw_password):
         return check_password_hash(self.password, raw_password)
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
 
 class User(UserMixin):
-    __tablename__ = "users"                                      # inherited from UserMixin
+    __tablename__ = "users"                               
 
     role = db.Column(db.Enum(Role), nullable=False)
     is_blacklisted = db.Column(db.Boolean, default=False)

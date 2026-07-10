@@ -4,7 +4,7 @@ from werkzeug.utils import secure_filename
 from datetime import date, datetime, timezone
 import os
 from apps.extensions import db, cache
-from apps.models import (User, StudentProfile, PlacementDrive, Application, DriveStatus, ApplicationStatus)
+from apps.models import (StudentProfile, PlacementDrive, Application, DriveStatus, ApplicationStatus)
 from apps.routes.auth_routes import student_required
 
 
@@ -120,6 +120,7 @@ def update_profile():
             student.resume = file_path
 
     db.session.commit()
+    cache.clear()   
     return jsonify({"message": "Profile updated"})
 
 

@@ -16,9 +16,7 @@ def role_required(role):
 
             user_id = get_jwt_identity()
             user = User.query.get(int(user_id))
-            if not user or user.is_blacklisted:
-                return jsonify({"error": "Access denied"}), 403
-            if user.role != role:
+            if not user or user.is_blacklisted or user.role != role:
                 return jsonify({"error": "Access denied"}), 403
 
             return function(*args, **kwargs)

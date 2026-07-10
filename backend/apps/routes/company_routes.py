@@ -9,13 +9,17 @@ from apps.routes.auth_routes import company_required
 
 company_bp = Blueprint("company", __name__)
 
+
+def get_company():
+    user_id = int(get_jwt_identity())
+    return CompanyProfile.query.filter_by(user_id=user_id).first()
+
+
 @company_bp.route("/dashboard")
 @company_required
 @cache.cached(timeout=60, query_string=True)
 def dashboard():
-
-    user_id = int(get_jwt_identity())
-    company = CompanyProfile.query.filter_by(user_id=user_id).first()
+    company = get_company()
     drives = PlacementDrive.query.filter_by(company_id=company.id).all()
     total_applications = Application.query.join(PlacementDrive).filter(PlacementDrive.company_id == company.id).count()
 
@@ -47,14 +51,13 @@ def dashboard():
 @company_bp.route("/drive/create", methods=["POST"])
 @company_required
 def create_drive():
-
-    user_id = int(get_jwt_identity())
-    company = CompanyProfile.query.filter_by(user_id=user_id).first()
+    company = get_company()
     if company.approval_status != ApprovalStatus.APPROVED:
         return jsonify({"error": "Company not approved"}), 403
 
     data = request.get_json()
-    deadline = datetime.strptime(data["application_deadline"], "%Y-%m-%d").date()
+
+    deadline = datetime.strptime(data["application_deadline"],"%Y-%m-%d").date()
     drive = PlacementDrive(
         company_id=company.id,
         job_title=data["job_title"],
@@ -73,9 +76,7 @@ def create_drive():
 @company_bp.route("/drive/close/<int:drive_id>", methods=["POST"])
 @company_required
 def close_drive(drive_id):
-
-    user_id = int(get_jwt_identity())
-    company = CompanyProfile.query.filter_by(user_id=user_id).first()
+    company = get_company()
     drive = PlacementDrive.query.filter_by(id=drive_id, company_id=company.id).first_or_404()
     drive.status = DriveStatus.CLOSED
     db.session.commit()
@@ -87,9 +88,7 @@ def close_drive(drive_id):
 @company_required
 @cache.cached(timeout=60, query_string=True)
 def applications(drive_id):
-
-    user_id = int(get_jwt_identity())
-    company = CompanyProfile.query.filter_by(user_id=user_id).first()
+    company = get_company()
     drive = PlacementDrive.query.filter_by(id=drive_id, company_id=company.id).first_or_404()
 
     applications = []
@@ -98,7 +97,9 @@ def applications(drive_id):
         applications.append({
             "application_id": application.id,
             "status": application.status.value,
-            "interview_date": str(application.interview_date) if application.interview_date else None,
+            "interview_date": str(application.interview_date)
+
+            if application.interview_date else None,
             "student": {
                 "name": student.user.name,
                 "email": student.user.email,
@@ -115,15 +116,14 @@ def applications(drive_id):
 @company_bp.route("/application/<int:app_id>/status", methods=["POST"])
 @company_required
 def update_status(app_id):
+    company = get_company()
 
-    user_id = int(get_jwt_identity())
-    company = CompanyProfile.query.filter_by(user_id=user_id).first()
     application = Application.query.get_or_404(app_id)
     if application.drive.company_id != company.id:
         return jsonify({"error": "Access denied"}), 403
-        
-    old_status = application.status.value
+
     data = request.get_json()
+    old_status = application.status.value
     new_status = ApplicationStatus(data["status"])
     application.status = new_status
 
@@ -140,6 +140,7 @@ def update_status(app_id):
     application.history = history
     flag_modified(application, "history")
     db.session.commit()
+    cache.clear()
     return jsonify({"message": "Status updated"})
 
 
@@ -147,16 +148,23 @@ def update_status(app_id):
 @company_required
 def export_history():
     from apps.tasks import export_csv_data
-    user_id = int(get_jwt_identity())
-    company = CompanyProfile.query.filter_by(user_id=user_id).first()
+
+    company = get_company()
     task = export_csv_data.delay(company.id, "company")
     return jsonify({"message": "CSV export started", "task_id": task.id}), 202
+
 
 @company_bp.route("/task-status/<task_id>")
 @company_required
 def task_status(task_id):
     from apps.celery_workers import celery
+
     task = celery.AsyncResult(task_id)
+
     if task.state == "SUCCESS":
-        return jsonify({"state": task.state, "file_url": "/" + task.result})
+        return jsonify({
+            "state": task.state,
+            "file_url": "/" + task.result
+        })
+
     return jsonify({"state": task.state})
