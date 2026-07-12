@@ -52,7 +52,7 @@ const studentDashboardTemplate = `
           <div v-else>
             <p><strong>Status:</strong> {{ getApplication(drive.id).status }}</p>
             <p v-if="getApplication(drive.id).interview_date">
-              <strong>Interview Date:</strong> {{ new Date(getApplication(drive.id).interview_date).toLocaleString() }}
+              <strong>Interview Date:</strong> {{ new Date(getApplication(drive.id).interview_date).toLocaleString('en-GB') }}
             </p>
           </div>
 
@@ -75,7 +75,7 @@ const studentDashboardTemplate = `
           <p>Status: {{ application.status }}</p>
           
           <p v-if="application.interview_date">
-            <strong>Interview Date:</strong> {{ new Date(application.interview_date).toLocaleString() }}
+            <strong>Interview Date:</strong> {{ new Date(application.interview_date).toLocaleString('en-GB') }}
           </p>
 
           <p>

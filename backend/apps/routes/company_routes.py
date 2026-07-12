@@ -139,6 +139,23 @@ def update_status(app_id):
 
     application.history = history
     flag_modified(application, "history")
+    
+
+    if new_status == ApplicationStatus.PLACED:
+        from apps.models import Placement
+        existing_placement = Placement.query.filter_by(application_id=application.id).first()
+        if not existing_placement:
+            placement = Placement(
+                application_id=application.id,
+                company_id=company.id,
+                student_id=application.student_id,
+                drive_id=application.drive_id,
+                job_title=application.drive.job_title,
+                salary_lpa=application.drive.salary_lpa,
+                joining_date=None
+            )
+            db.session.add(placement)
+            
     db.session.commit()
     cache.clear()
     return jsonify({"message": "Status updated"})

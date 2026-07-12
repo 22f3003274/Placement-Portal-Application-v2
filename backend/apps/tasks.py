@@ -48,12 +48,14 @@ def generate_monthly_report():
 
     admin = User.query.filter_by(role=Role.ADMIN).first()
 
+    month = date.today().strftime("%B")
+    year = date.today().year
     total_drives = PlacementDrive.query.count()
     total_applications = Application.query.count()
     total_placements = Placement.query.count()
 
     html = f"""
-    <h1>Monthly Placement Report</h1>
+    <h1>Monthly Placement Report For: {month} {year}</h1>
 
     <p>Total Drives: {total_drives}</p>
     <p>Total Applications: {total_applications}</p>
