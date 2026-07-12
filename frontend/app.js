@@ -19,7 +19,8 @@ const router = VueRouter.createRouter({
 
 const app = Vue.createApp({});
 
+app.component('app-navbar', Navbar);
+
 app.use(router);
 
 app.mount("#app");
-
