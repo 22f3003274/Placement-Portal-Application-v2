@@ -1,27 +1,51 @@
 const Login = {
   template: `
     <div class="container mt-5">
-      <h2>Login</h2>
+        <div class="row justify-content-center">
+            <div class="col-md-6">
 
-      <form @submit.prevent="login">
-        <input v-model="email" type="email" placeholder="Email" required >
-        <br><br>
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white text-center">
+                        <h4 class="mb-0">Login</h4>
+                    </div>
 
-        <input v-model="password" type="password" placeholder="Password" required >
-        <br><br>
+                    <div class="card-body">
+                    
+                        <div v-if="error" class="alert alert-danger">
+                            {{ error }}
+                        </div>
 
-        <button type="submit">Login</button>
+                        <form @submit.prevent="login">
 
-      </form>
+                            <div class="mb-3">
+                                <label class="form-label">Email</label>
+                                <input type="email" class="form-control" v-model="email" placeholder="Email" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Password</label>
+                                <input type="password" class="form-control" v-model="password" placeholder="Password" required>
+                            </div>
 
-      <p v-if="error">{{ error }}</p>
+                            <button type="submit" class="btn btn-primary w-100">Login</button>
 
-      <hr>
+                        </form>
 
-      <a href="#/register-student">Student Registration</a>
-      <br><br>
-      <a href="#/register-company">Company Registration</a>
+                        <div class="mt-4 text-center">
+                            <p>Are you a new user? Register below:</p>
+                            <p>
+                                <a href="#/register-company">Register as Company</a>
+                            </p>
+                            <p>
+                                <a href="#/register-student">Register as Student</a>
+                            </p>
 
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
     </div>
   `,
 
@@ -49,7 +73,9 @@ const Login = {
       if (response.ok) {
         localStorage.setItem("token", data.access_token);
         localStorage.setItem("user", JSON.stringify(data.user));
-        this.$router.push("/" + data.user.role + "/dashboard");
+        this.$router.push("/" + data.user.role + "/dashboard").then(() => {
+          window.location.reload();
+        });
       }
       else {
         this.error = data.error;

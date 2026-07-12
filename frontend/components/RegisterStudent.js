@@ -1,28 +1,52 @@
 const RegisterStudent = {
   template: `
     <div class="container mt-5">
-      <h2>Student Registration</h2>
+        <div class="row justify-content-center">
+            <div class="col-md-6">
 
-      <form @submit.prevent="register">
-        <input v-model="name" type="text" placeholder="Name" required >
-        <br><br>
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white text-center">
+                        <h4 class="mb-0">Student Registration</h4>
+                    </div>
 
-        <input v-model="email" type="email" placeholder="Email" required>
-        <br><br>
+                    <div class="card-body">
 
-        <input v-model="password" type="password" placeholder="Password" required>
-        <br><br>
+                        <div v-if="error" class="alert alert-danger">
+                            {{ error }}
+                        </div>
 
-        <button type="submit">Register</button>
+                        <form @submit.prevent="register">
 
-      </form>
+                            <div class="mb-3">
+                                <label class="form-label">Name</label>
+                                <input v-model="name" type="text" class="form-control" placeholder="Name" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Email</label>
+                                <input v-model="email" type="email" class="form-control" placeholder="Email" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Password</label>
+                                <input v-model="password" type="password" class="form-control" placeholder="Password" required>
+                            </div>
 
-      <p v-if="error">{{ error }}</p>
+                            <button type="submit" class="btn btn-primary w-100">Register</button>
 
-      <p>
-        <a href="#/login">Back to Login</a>
-      </p>
+                        </form>
 
+                        <div class="mt-4 text-center">
+                            <p>
+                                <a href="#/login">Back to Login</a>
+                            </p>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
     </div>
   `,
 

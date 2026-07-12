@@ -3,13 +3,10 @@ const DashboardLayout = {
 
   template: `
     <div class="container mt-4">
-      <h2>{{ title }}</h2>
-
-      <p>Hello, {{ user.name }} </p>
-
-      <button @click="logout"> Logout </button>
-
-      <hr>
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>{{ title }}</h2>
+        <span class="text-muted">Welcome, <strong>{{ user.name }}</strong></span>
+      </div>
 
       <slot></slot>
 

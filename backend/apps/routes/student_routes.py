@@ -4,7 +4,7 @@ from werkzeug.utils import secure_filename
 from datetime import date, datetime, timezone
 import os
 from apps.extensions import db, cache
-from apps.models import (StudentProfile, PlacementDrive, Application, DriveStatus, ApplicationStatus)
+from apps.models import (User, StudentProfile, PlacementDrive, Application, DriveStatus, ApplicationStatus)
 from apps.routes.auth_routes import student_required
 
 
@@ -98,30 +98,33 @@ def apply(drive_id):
 def update_profile():
 
     user_id = int(get_jwt_identity())
-    user = User.query.get(user_id)
     student = StudentProfile.query.filter_by(user_id=user_id).first()
-    student.roll_number = request.form.get("roll_number",student.roll_number)
-    student.branch = request.form.get("branch",student.branch)
-    student.skills = request.form.get("skills",student.skills)
+    roll_val = request.form.get("roll_number")
+    student.roll_number = roll_val.strip() if roll_val and roll_val.strip() else None
 
-    if request.form.get("year"):
-        student.year = int(request.form["year"])
-    if request.form.get("cgpa"):
-        student.cgpa = float(request.form["cgpa"])
+    branch_val = request.form.get("branch")
+    student.branch = branch_val.strip() if branch_val and branch_val.strip() else None
+
+    skills_val = request.form.get("skills")
+    student.skills = skills_val.strip() if skills_val and skills_val.strip() else None
+
+    year_val = request.form.get("year")
+    student.year = int(year_val) if year_val and str(year_val).strip() else None
+
+    cgpa_val = request.form.get("cgpa")
+    student.cgpa = float(cgpa_val) if cgpa_val and str(cgpa_val).strip() else None
 
     resume = request.files.get("resume")
-    if resume:
+    if resume and resume.filename:
         filename = secure_filename(resume.filename)
-        extension = filename.split(".")[-1].lower()
-        if extension in ALLOWED_EXTENSIONS:
-            os.makedirs(UPLOAD_FOLDER,exist_ok=True)
-            file_path = os.path.join(UPLOAD_FOLDER,filename)
-            resume.save(file_path)
-            student.resume = file_path
+        os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+        filepath = os.path.join(UPLOAD_FOLDER, f"user_{user_id}_{filename}")
+        resume.save(filepath)
+        student.resume = filepath
 
     db.session.commit()
     cache.clear()   
-    return jsonify({"message": "Profile updated"})
+    return jsonify({"message": "Profile updated!"})
 
 
 @student_bp.route("/export-history", methods=["POST"])

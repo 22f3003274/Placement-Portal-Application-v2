@@ -85,7 +85,7 @@ const CompanyDashboard = {
         {
           method: "POST",
           headers: { "Content-Type": "application/json", Authorization: "Bearer " + localStorage.getItem("token") },
-          body: JSON.stringify({ 
+          body: JSON.stringify({
             status: application.status,
             interview_date: application.interview_date
           })
@@ -111,9 +111,9 @@ const CompanyDashboard = {
       });
       const data = await res.json();
       if (!data.task_id) return alert("Failed to start export.");
-      
+
       alert("CSV Export started. Please wait, you will be prompted to download once complete.");
-      
+
       const checkStatus = async () => {
         const statusRes = await fetch(API + "/company/task-status/" + data.task_id, {
           headers: { Authorization: "Bearer " + localStorage.getItem("token") }
@@ -128,7 +128,7 @@ const CompanyDashboard = {
           setTimeout(checkStatus, 2000);
         }
       };
-      
+
       checkStatus();
     }
   },
