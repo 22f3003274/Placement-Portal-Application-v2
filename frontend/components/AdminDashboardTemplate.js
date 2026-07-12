@@ -1,162 +1,275 @@
 const adminDashboardTemplate = `
     <DashboardLayout title="Admin Dashboard">
 
-      <button @click="tab = 'stats'">Stats</button>
-      <button @click="tab = 'students'">Students</button>
-      <button @click="tab = 'companies'">Companies</button>
-      <button @click="tab = 'drives'">Drives</button>
-      <button @click="tab = 'applications'">Applications</button>
-
-      <hr>
+      <ul class="nav nav-tabs mb-4">
+        <li class="nav-item">
+          <a class="nav-link" :class="{ active: tab === 'stats' }" href="#" @click.prevent="tab = 'stats'">Stats</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" :class="{ active: tab === 'students' }" href="#" @click.prevent="tab = 'students'">Students</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" :class="{ active: tab === 'companies' }" href="#" @click.prevent="tab = 'companies'">Companies</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" :class="{ active: tab === 'drives' }" href="#" @click.prevent="tab = 'drives'">Drives</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" :class="{ active: tab === 'applications' }" href="#" @click.prevent="tab = 'applications'">Applications</a>
+        </li>
+      </ul>
 
       <div v-if="tab === 'stats'">
-        <h3>Statistics</h3>
+        <h4 class="mb-3">Statistics</h4>
+        <div class="row g-3 mb-4">
+          <div class="col-md-3">
+            <div class="card text-center shadow-sm h-100">
+              <div class="card-body">
+                <h5 class="card-title text-muted">Students</h5>
+                <h2 class="mb-0">{{ stats.students }}</h2>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="card text-center shadow-sm h-100">
+              <div class="card-body">
+                <h5 class="card-title text-muted">Companies</h5>
+                <h2 class="mb-0">{{ stats.companies }}</h2>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="card text-center shadow-sm h-100">
+              <div class="card-body">
+                <h5 class="card-title text-muted">Drives</h5>
+                <h2 class="mb-0">{{ stats.drives }}</h2>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="card text-center shadow-sm h-100">
+              <div class="card-body">
+                <h5 class="card-title text-muted">Applications</h5>
+                <h2 class="mb-0">{{ stats.applications }}</h2>
+              </div>
+            </div>
+          </div>
+        </div>
 
-        <p>Students: {{ stats.students }}</p>
-        <p>Companies: {{ stats.companies }}</p>
-        <p>Drives: {{ stats.drives }}</p>
-        <p>Applications: {{ stats.applications }}</p>
-
+        <div class="row g-4 mb-5">
+          <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+              <div class="card-body">
+                <h6 class="card-title text-muted text-center mb-3">Students Breakdown</h6>
+                <div style="position:relative; height:220px;">
+                  <canvas id="studentsChart"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+              <div class="card-body">
+                <h6 class="card-title text-muted text-center mb-3">Companies Breakdown</h6>
+                <div style="position:relative; height:220px;">
+                  <canvas id="companiesChart"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+              <div class="card-body">
+                <h6 class="card-title text-muted text-center mb-3">Drives Breakdown</h6>
+                <div style="position:relative; height:220px;">
+                  <canvas id="drivesChart"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-
 
       <div v-if="tab === 'students'">
-        <h3>Students</h3>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h4 class="mb-0">Students</h4>
+          <div class="input-group w-auto">
+            <input v-model="studentSearch" class="form-control" placeholder="Search student">
+            <button class="btn btn-outline-secondary" @click="getStudents">Search</button>
+          </div>
+        </div>
 
-        <input v-model="studentSearch" placeholder="Search student" >
-        <button @click="getStudents">Search</button>
-        <br><br>
-
-        <table border="1">
-          <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Roll Number</th>
-            <th>Status</th>
-            <th>Action</th>
-          </tr>
-
-          <tr v-for="student in students" :key="student.id">
-            <td>{{ student.name }}</td>
-            <td>{{ student.email }}</td>
-            <td>{{ student.roll_number }}</td>
-
-            <td>
-              {{ student.is_blacklisted ? "Blacklisted" : "Active" }}
-            </td>
-
-            <td>
-              <button @click="blacklist(student.id)">
-                {{ student.is_blacklisted ? 'Unblacklist' : 'Blacklist' }}
-              </button>
-            </td>
-
-          </tr>
-        </table>
+        <div class="table-responsive shadow-sm rounded">
+          <table class="table table-hover table-striped mb-0 align-middle">
+            <thead class="table-light">
+              <tr>
+                <th style="width: 20%">Name</th>
+                <th style="width: 25%">Email</th>
+                <th style="width: 20%">Roll Number</th>
+                <th class="text-center" style="width: 15%">Status</th>
+                <th class="text-end" style="width: 20%">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="student in students" :key="student.id">
+                <td>{{ student.name }}</td>
+                <td>{{ student.email }}</td>
+                <td>{{ student.roll_number}}</td>
+                <td class="text-center">
+                  <span class="badge" :class="student.is_blacklisted ? 'bg-danger' : 'bg-success'">
+                    {{ student.is_blacklisted ? "Blacklisted" : "Active" }}
+                  </span>
+                </td>
+                <td class="text-end">
+                  <button class="btn btn-sm" :class="student.is_blacklisted ? 'btn-outline-success' : 'btn-outline-danger'" @click="blacklist(student.id)">
+                    {{ student.is_blacklisted ? 'Unblacklist' : 'Blacklist' }}
+                  </button>
+                </td>
+              </tr>
+              <tr v-if="students.length === 0">
+                <td colspan="5" class="text-center text-muted py-4">No students found</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
-
 
       <div v-if="tab === 'companies'"> 
-        <h3>Companies</h3>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h4 class="mb-0">Companies</h4>
+          <div class="input-group w-auto">
+            <input v-model="companySearch" class="form-control" placeholder="Search company">
+            <button class="btn btn-outline-secondary" @click="getCompanies">Search</button>
+          </div>
+        </div>
 
-        <input v-model="companySearch" placeholder="Search company">
-        <button @click="getCompanies">Search</button>
-        <br><br>
-
-        <table border="1">
-          <tr>
-            <th>Company</th>
-            <th>Website</th>
-            <th>Approval</th>
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
-
-          <tr v-for="company in companies" :key="company.id">
-            <td>{{ company.company_name }}</td>
-            <td>{{ company.website }}</td>
-            <td>{{ company.approval_status }}</td>
-
-            <td>
-              {{ company.is_blacklisted ? "Blacklisted" : "Active" }}
-            </td>
-
-            <td>
-              <button v-if="company.approval_status !== 'approved'" @click="changeCompanyStatus(company.id, 'approved')"> Approve </button>
-              <button v-else disabled> Approved </button>
-
-              <button v-if="company.approval_status !== 'rejected'" @click="changeCompanyStatus(company.id, 'rejected')"> Reject </button>
-              <button v-else disabled> Rejected </button>
-
-              <button @click="blacklist(company.user_id)">
-                {{ company.is_blacklisted ? 'Unblacklist' : 'Blacklist' }}
-              </button>
-            </td>
-
-          </tr>
-        </table>
+        <div class="table-responsive shadow-sm rounded">
+          <table class="table table-hover table-striped mb-0 align-middle">
+            <thead class="table-light">
+              <tr>
+                <th style="width: 25%">Company</th>
+                <th style="width: 25%">Website</th>
+                <th class="text-center" style="width: 15%">Approval</th>
+                <th class="text-center" style="width: 15%">Status</th>
+                <th class="text-end" style="width: 20%">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="company in companies" :key="company.id">
+                <td class="fw-medium">{{ company.company_name }}</td>
+                <td>
+                  <a v-if="company.website" :href="company.website.startsWith('http') ? company.website : 'https://' + company.website" target="_blank" class="text-decoration-none">
+                    {{ company.website }}
+                  </a>
+                  <span v-else class="text-muted small">N/A</span>
+                </td>
+                <td class="text-center">
+                  <span class="badge" :class="company.approval_status === 'approved' ? 'bg-success' : (company.approval_status === 'rejected' ? 'bg-danger' : 'bg-warning text-dark')">
+                    {{ company.approval_status }}
+                  </span>
+                </td>
+                <td class="text-center">
+                  <span class="badge" :class="company.is_blacklisted ? 'bg-danger' : 'bg-success'">
+                    {{ company.is_blacklisted ? "Blacklisted" : "Active" }}
+                  </span>
+                </td>
+                <td class="text-end">
+                  <div class="btn-group btn-group-sm">
+                    <button class="btn btn-outline-success" v-if="company.approval_status !== 'approved'" @click="changeCompanyStatus(company.id, 'approved')">Approve</button>
+                    <button class="btn btn-outline-danger" v-if="company.approval_status !== 'rejected'" @click="changeCompanyStatus(company.id, 'rejected')">Reject</button>
+                    <button class="btn" :class="company.is_blacklisted ? 'btn-outline-secondary' : 'btn-outline-dark'" @click="blacklist(company.user_id)">
+                      {{ company.is_blacklisted ? 'Unblacklist' : 'Blacklist' }}
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              <tr v-if="companies.length === 0">
+                <td colspan="5" class="text-center text-muted py-4">No companies found</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
-
 
       <div v-if="tab === 'drives'">
-        <h3>Placement Drives</h3>
+        <h4 class="mb-3">Placement Drives</h4>
 
-        <table border="1">
-          <tr>
-            <th>Company</th>
-            <th>Job Title</th>
-            <th>Salary</th>
-            <th>Deadline</th>
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
-
-          <tr v-for="drive in drives" :key="drive.id">
-
-            <td>{{ drive.company_name }}</td>
-            <td>{{ drive.job_title }}</td>
-            <td>{{ drive.salary_lpa }}</td>
-            <td>{{ drive.application_deadline }}</td>
-            <td>{{ drive.status }}</td>
-
-            <td>
-              <button v-if="drive.status !== 'approved'" @click="changeDriveStatus(drive.id, 'approved')"> Approve </button>
-              <button v-else disabled> Approved </button>
-
-              <button v-if="drive.status !== 'rejected'" @click="changeDriveStatus(drive.id, 'rejected')"> Reject </button>
-              <button v-else disabled> Rejected </button>
-
-              <button v-if="drive.status !== 'closed'" @click="changeDriveStatus(drive.id, 'closed')"> Close </button>
-              <button v-else disabled> Closed </button>
-            </td>
-
-          </tr>
-        </table>
+        <div class="table-responsive shadow-sm rounded">
+          <table class="table table-hover table-striped mb-0 align-middle">
+            <thead class="table-light">
+              <tr>
+                <th style="width: 20%">Company</th>
+                <th style="width: 25%">Job Title</th>
+                <th style="width: 15%">CTC</th>
+                <th style="width: 15%">Deadline</th>
+                <th class="text-center" style="width: 10%">Status</th>
+                <th class="text-end" style="width: 15%">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="drive in drives" :key="drive.id">
+                <td class="fw-medium">{{ drive.company_name }}</td>
+                <td>{{ drive.job_title }}</td>
+                <td>{{ drive.salary_lpa }}</td>
+                <td>{{ drive.application_deadline }}</td>
+                <td class="text-center">
+                  <span class="badge" :class="drive.status === 'approved' ? 'bg-success' : (drive.status === 'rejected' ? 'bg-danger' : (drive.status === 'closed' ? 'bg-secondary' : 'bg-warning text-dark'))">
+                    {{ drive.status }}
+                  </span>
+                </td>
+                <td class="text-end">
+                  <div class="btn-group btn-group-sm">
+                    <button class="btn btn-outline-success" v-if="drive.status !== 'approved'" @click="changeDriveStatus(drive.id, 'approved')">Approve</button>
+                    <button class="btn btn-outline-danger" v-if="drive.status !== 'rejected'" @click="changeDriveStatus(drive.id, 'rejected')">Reject</button>
+                    <button class="btn btn-outline-secondary" v-if="drive.status !== 'closed'" @click="changeDriveStatus(drive.id, 'closed')">Close</button>
+                  </div>
+                </td>
+              </tr>
+              <tr v-if="drives.length === 0">
+                <td colspan="6" class="text-center text-muted py-4">No drives found</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
-
 
       <div v-if="tab === 'applications'">
-        <h3>Applications</h3>
+        <h4 class="mb-3">Applications</h4>
 
-        <table border="1">
-          <tr>
-            <th>Student</th>
-            <th>Company</th>
-            <th>Job</th>
-            <th>Status</th>
-            <th>Applied At</th>
-          </tr>
-
-          <tr v-for="application in applications" :key="application.id">
-            <td>{{ application.student_name }}</td>
-            <td>{{ application.company_name }}</td>
-            <td>{{ application.job_title }}</td>
-            <td>{{ application.status }}</td>
-            <td>{{ application.applied_at }}</td>
-
-          </tr>
-
-        </table>
+        <div class="table-responsive shadow-sm rounded">
+          <table class="table table-hover table-striped mb-0 align-middle">
+            <thead class="table-light">
+              <tr>
+                <th style="width: 20%">Student</th>
+                <th style="width: 20%">Company</th>
+                <th style="width: 25%">Job</th>
+                <th class="text-center" style="width: 15%">Status</th>
+                <th class="text-end" style="width: 20%">Applied At</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="application in applications" :key="application.id">
+                <td class="fw-medium">{{ application.student_name }}</td>
+                <td>{{ application.company_name }}</td>
+                <td>{{ application.job_title }}</td>
+                <td class="text-center">
+                  <span class="badge" :class="{
+                    'bg-warning text-dark': application.status === 'applied' || application.status === 'shortlisted' || application.status === 'interview',
+                    'bg-info text-dark': application.status === 'offer',
+                    'bg-success': application.status === 'placed',
+                    'bg-danger': application.status === 'rejected'
+                  }">
+                    {{ application.status }}
+                  </span>
+                </td>
+                <td class="text-end text-muted small">{{ application.applied_at }}</td>
+              </tr>
+              <tr v-if="applications.length === 0">
+                <td colspan="5" class="text-center text-muted py-4">No applications found</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </DashboardLayout>
-  `;
+`;

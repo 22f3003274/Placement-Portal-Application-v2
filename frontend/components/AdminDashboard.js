@@ -8,6 +8,7 @@ const AdminDashboard = {
       tab: "stats",
 
       stats: {},
+      chartData: null,
       students: [],
       companies: [],
       drives: [],
@@ -17,6 +18,50 @@ const AdminDashboard = {
     };
   },
 
+  watch: {
+    chartData(data) {
+      if (!data) return;
+      this.$nextTick(() => {
+        ['studentsChart', 'companiesChart', 'drivesChart'].forEach(id => {
+          const existing = Chart.getChart(id);
+          if (existing) existing.destroy();
+        });
+
+        new Chart(document.getElementById('studentsChart'), {
+          type: 'pie',
+          data: {
+            labels: ['Active', 'Blacklisted'],
+            datasets: [{ data: [data.students.active, data.students.blacklisted], backgroundColor: ['#28a745', '#dc3545'] }]
+          },
+          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+        });
+
+        new Chart(document.getElementById('companiesChart'), {
+          type: 'pie',
+          data: {
+            labels: ['Approved', 'Pending', 'Blacklisted', 'Rejected'],
+            datasets: [{ data: [data.companies.approved, data.companies.pending, data.companies.blacklisted, data.companies.rejected], backgroundColor: ['#28a745', '#ffc107', '#343a40', '#dc3545'] }]
+          },
+          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+        });
+
+        new Chart(document.getElementById('drivesChart'), {
+          type: 'pie',
+          data: {
+            labels: ['Approved', 'Rejected', 'Closed'],
+            datasets: [{ data: [data.drives.approved, data.drives.rejected, data.drives.closed], backgroundColor: ['#28a745', '#dc3545', '#6c757d'] }]
+          },
+          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+        });
+      });
+    },
+
+    tab(newTab) {
+      if (newTab === 'stats') this.getChartStats();
+    }
+  },
+
+
   methods: {
     async getStats() {
       const response = await fetch(API + "/admin/stats", {
@@ -24,6 +69,15 @@ const AdminDashboard = {
       });
       this.stats = await response.json();
     },
+
+    async getChartStats() {
+      const response = await fetch(API + "/admin/chart-stats", {
+        headers: { Authorization: "Bearer " + localStorage.getItem("token") }
+      });
+      this.chartData = await response.json();
+    },
+
+
 
 
     async getStudents() {
@@ -116,6 +170,7 @@ const AdminDashboard = {
 
   mounted() {
     this.getStats();
+    this.getChartStats();
     this.getStudents();
     this.getCompanies();
     this.getDrives();

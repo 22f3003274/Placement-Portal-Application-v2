@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
+from sqlalchemy import func
 from apps.extensions import db, cache
-from apps.models import User,Role,StudentProfile,CompanyProfile,PlacementDrive,Application,ApprovalStatus,DriveStatus
+from apps.models import User,Role,StudentProfile,CompanyProfile,PlacementDrive,Application,ApprovalStatus,DriveStatus,Placement
 from apps.routes.auth_routes import admin_required
 
 
@@ -10,12 +11,33 @@ admin_bp = Blueprint("admin", __name__)
 @admin_required
 @cache.cached(timeout=60, query_string=True)
 def stats():
-
     return jsonify({
         "students": User.query.filter_by(role=Role.STUDENT).count(),
         "companies": CompanyProfile.query.count(),
         "drives": PlacementDrive.query.count(),
         "applications": Application.query.count()
+    })
+
+
+@admin_bp.route("/chart-stats")
+@admin_required
+def chart_stats():
+    return jsonify({
+        "students": {
+            "active": User.query.filter_by(role=Role.STUDENT, is_blacklisted=False).count(),
+            "blacklisted": User.query.filter_by(role=Role.STUDENT, is_blacklisted=True).count()
+        },
+        "companies": {
+            "approved": CompanyProfile.query.filter_by(approval_status=ApprovalStatus.APPROVED).count(),
+            "pending": CompanyProfile.query.filter_by(approval_status=ApprovalStatus.PENDING).count(),
+            "blacklisted": CompanyProfile.query.filter_by(approval_status=ApprovalStatus.BLACKLISTED).count(),
+            "rejected": CompanyProfile.query.filter_by(approval_status=ApprovalStatus.REJECTED).count()
+        },
+        "drives": {
+            "approved": PlacementDrive.query.filter_by(status=DriveStatus.APPROVED).count(),
+            "rejected": PlacementDrive.query.filter_by(status=DriveStatus.REJECTED).count(),
+            "closed": PlacementDrive.query.filter_by(status=DriveStatus.CLOSED).count()
+        }
     })
 
 
