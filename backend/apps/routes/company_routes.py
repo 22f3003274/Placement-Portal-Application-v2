@@ -23,17 +23,15 @@ def dashboard():
     drives = PlacementDrive.query.filter_by(company_id=company.id).all()
     total_applications = Application.query.join(PlacementDrive).filter(PlacementDrive.company_id == company.id).count()
 
-    drive_list = []
-    for drive in drives:
-        drive_list.append({
-            "id": drive.id,
-            "job_title": drive.job_title,
-            "job_description": drive.job_description,
-            "eligibility_criteria": drive.eligibility_criteria,
-            "salary_lpa": drive.salary_lpa,
-            "application_deadline": str(drive.application_deadline),
-            "status": drive.status.value
-        })
+    drive_list = [{
+    "id": drive.id,
+    "job_title": drive.job_title,
+    "job_description": drive.job_description,
+    "eligibility_criteria": drive.eligibility_criteria,
+    "salary_lpa": drive.salary_lpa,
+    "application_deadline": str(drive.application_deadline),
+    "status": drive.status.value
+    } for drive in drives]
     return jsonify({
         "company": {
             "id": company.id,
@@ -91,25 +89,19 @@ def applications(drive_id):
     company = get_company()
     drive = PlacementDrive.query.filter_by(id=drive_id, company_id=company.id).first_or_404()
 
-    applications = []
-    for application in drive.applications:
-        student = application.student
-        applications.append({
-            "application_id": application.id,
-            "status": application.status.value,
-            "interview_date": str(application.interview_date)
-
-            if application.interview_date else None,
-            "student": {
-                "name": student.user.name,
-                "email": student.user.email,
-                "roll_number": student.roll_number,
-                "branch": student.branch,
-                "cgpa": student.cgpa,
-                "skills": student.skills,
-                "resume": student.resume
-            }
-        })
+    applications = [{
+    "application_id": app.id,
+    "status": app.status.value,
+    "interview_date": str(app.interview_date) if app.interview_date else None,
+    "student": {
+        "name": app.student.user.name,
+        "email": app.student.user.email,
+        "roll_number": app.student.roll_number,
+        "branch": app.student.branch,
+        "cgpa": app.student.cgpa,
+        "skills": app.student.skills,
+        "resume": app.student.resume
+    }} for app in drive.applications]
     return jsonify(applications)
 
 

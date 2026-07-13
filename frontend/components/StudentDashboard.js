@@ -67,7 +67,7 @@ const StudentDashboard = {
       }
 
       const response = await fetch(API + "/student/profile/update", {
-        method: "POST",
+        method: "PATCH",
         headers: { Authorization: "Bearer " + localStorage.getItem("token") },
         body: form
       });

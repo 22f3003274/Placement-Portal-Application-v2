@@ -112,7 +112,7 @@ const CompanyDashboard = {
       const data = await res.json();
       if (!data.task_id) return alert("Failed to start export.");
 
-      alert("CSV Export started. Please wait, you will be prompted to download once complete.");
+      alert("CSV Export started.");
 
       const checkStatus = async () => {
         const statusRes = await fetch(API + "/company/task-status/" + data.task_id, {

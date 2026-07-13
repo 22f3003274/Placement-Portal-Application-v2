@@ -55,15 +55,13 @@ def students():
             | StudentProfile.roll_number.like(f"%{search}%")
         )
 
-    students = []
-    for user in query.all():
-        students.append({
-            "id": user.id,
-            "name": user.name,
-            "email": user.email,
-            "roll_number": user.student_profile.roll_number,
-            "is_blacklisted": user.is_blacklisted
-        })
+    students = [{
+        "id": user.id,
+        "name": user.name,
+        "email": user.email,
+        "roll_number": user.student_profile.roll_number,
+        "is_blacklisted": user.is_blacklisted
+    } for user in query.all()]
 
     return jsonify(students)
 
@@ -78,16 +76,14 @@ def companies():
     if search:
         query = query.filter( CompanyProfile.company_name.like(f"%{search}%"))
 
-    companies = []
-    for company in query.all():
-        companies.append({
-            "id": company.id,
-            "user_id": company.user_id,
-            "company_name": company.company_name,
-            "website": company.website,
-            "approval_status": company.approval_status.value,
-            "is_blacklisted": company.user.is_blacklisted
-        })
+    companies = [{
+        "id": company.id,
+        "user_id": company.user_id,
+        "company_name": company.company_name,
+        "website": company.website,
+        "approval_status": company.approval_status.value,
+        "is_blacklisted": company.user.is_blacklisted
+    } for company in query.all()]
     return jsonify(companies)
 
 
@@ -96,16 +92,14 @@ def companies():
 @cache.cached(timeout=60, query_string=True)
 def drives():
 
-    drives = []
-    for drive in PlacementDrive.query.all():
-        drives.append({
-            "id": drive.id,
-            "company_name": drive.company.company_name,
-            "job_title": drive.job_title,
-            "salary_lpa": drive.salary_lpa,
-            "application_deadline": str(drive.application_deadline),
-            "status": drive.status.value
-        })
+    drives = [{
+        "id": drive.id,
+        "company_name": drive.company.company_name,
+        "job_title": drive.job_title,
+        "salary_lpa": drive.salary_lpa,
+        "application_deadline": str(drive.application_deadline),
+        "status": drive.status.value
+    } for drive in PlacementDrive.query.all()]
     return jsonify(drives)
 
 
@@ -114,16 +108,14 @@ def drives():
 @cache.cached(timeout=60, query_string=True)
 def applications():
 
-    applications = []
-    for application in Application.query.all():
-        applications.append({
-            "id": application.id,
-            "student_name": application.student.user.name,
-            "company_name": application.drive.company.company_name,
-            "job_title": application.drive.job_title,
-            "status": application.status.value,
-            "applied_at": str(application.applied_at)
-        })
+    applications = [{
+        "id": application.id,
+        "student_name": application.student.user.name,
+        "company_name": application.drive.company.company_name,
+        "job_title": application.drive.job_title,
+        "status": application.status.value,
+        "applied_at": str(application.applied_at)
+    } for application in Application.query.all()]
     return jsonify(applications)
 
 

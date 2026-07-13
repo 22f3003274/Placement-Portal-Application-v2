@@ -26,18 +26,17 @@ def send_interview_reminders():
     applications = Application.query.all()
 
     for app in applications:
-        if app.status == ApplicationStatus.INTERVIEW:
-            if app.interview_date != None:
-                if app.interview_date.date() == tomorrow:
+        if (app.status == ApplicationStatus.INTERVIEW
+            and app.interview_date is not None
+            and app.interview_date.date() == tomorrow):
 
-                    student_email = app.student.user.email
-                    
-                    msg = Message(
-                        subject="Interview Reminder",
-                        recipients=[student_email],
-                        body=f"You have an interview scheduled for the role of {app.drive.job_title} at {app.drive.company.company_name} tomorrow!"
-                    )
-                    mail.send(msg)
+            student_email = app.student.user.email
+            msg = Message(
+                subject="Interview Reminder",
+                recipients=[student_email],
+                body=f"You have an interview scheduled for the role of {app.drive.job_title} at {app.drive.company.company_name} tomorrow!"
+            )
+            mail.send(msg)
 
     return "Reminded all students for interview"                
                     
@@ -83,27 +82,23 @@ def export_csv_data(user_id, role):
         applications = Application.query.filter(Application.student.has(user_id=user_id)).all()
 
         headings = ["Drive", "Company", "Status", "Applied At"]
-        rows = []
-        for application in applications:
-            rows.append([
-                application.drive.job_title,
-                application.drive.company.company_name,
-                application.status.value,
-                application.applied_at
-            ])
+        rows = [[
+            app.drive.job_title,
+            app.drive.company.company_name,
+            app.status.value,
+            app.applied_at
+        ] for app in applications]
 
     elif role == "company":
         applications = Application.query.filter(Application.drive.has(company_id=user_id)).all()
 
         headings = ["Student", "Job Title", "Status", "Applied At"]
-        rows = []
-        for application in applications:
-            rows.append([
-                application.student.user.name,
-                application.drive.job_title,
-                application.status.value,
-                application.applied_at
-            ])
+        rows = [[
+            app.student.user.name,
+            app.drive.job_title,
+            app.status.value,
+            app.applied_at
+        ] for app in applications]
 
     else:
         return None

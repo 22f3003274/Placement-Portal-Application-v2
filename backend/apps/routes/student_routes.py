@@ -24,29 +24,25 @@ def dashboard():
     drives = PlacementDrive.query.filter_by(status=DriveStatus.APPROVED).all()
     applications = Application.query.filter_by(student_id=student.id).all()
 
-    drive_list = []
-    for drive in drives:
-        drive_list.append({
-            "id": drive.id,
-            "company_name": drive.company.company_name,
-            "job_title": drive.job_title,
-            "job_description": drive.job_description,
-            "salary_lpa": drive.salary_lpa,
-            "application_deadline": str(drive.application_deadline)
-        })
+    drive_list = [{
+    "id": drive.id,
+    "company_name": drive.company.company_name,
+    "job_title": drive.job_title,
+    "job_description": drive.job_description,
+    "salary_lpa": drive.salary_lpa,
+    "application_deadline": str(drive.application_deadline)
+    } for drive in drives]
 
-    application_list = []
-    for application in applications:
-        application_list.append({
-            "id": application.id,
-            "drive_id": application.drive_id,
-            "job_title": application.drive.job_title,
-            "company_name": application.drive.company.company_name,
-            "status": application.status.value,
-            "interview_date": str(application.interview_date) if application.interview_date else None,
-            "applied_at": str(application.applied_at),
-            "logs": application.history or []
-        })
+    application_list = [{
+    "id": app.id,
+    "drive_id": app.drive_id,
+    "job_title": app.drive.job_title,
+    "company_name": app.drive.company.company_name,
+    "status": app.status.value,
+    "interview_date": str(app.interview_date) if app.interview_date else None,
+    "applied_at": str(app.applied_at),
+    "logs": app.history or []
+    } for app in applications]
         
     return jsonify({
         "student": {
@@ -93,26 +89,31 @@ def apply(drive_id):
     return jsonify({"message": "Applied successfully"}), 201
 
 
-@student_bp.route("/profile/update", methods=["POST"])
+@student_bp.route("/profile/update", methods=["PATCH"])
 @student_required
 def update_profile():
-
     user_id = int(get_jwt_identity())
     student = StudentProfile.query.filter_by(user_id=user_id).first()
+    
     roll_val = request.form.get("roll_number")
-    student.roll_number = roll_val.strip() if roll_val and roll_val.strip() else None
+    if roll_val is not None:
+        student.roll_number = roll_val.strip() if roll_val.strip() else None
 
     branch_val = request.form.get("branch")
-    student.branch = branch_val.strip() if branch_val and branch_val.strip() else None
+    if branch_val is not None:
+        student.branch = branch_val.strip() if branch_val.strip() else None
 
     skills_val = request.form.get("skills")
-    student.skills = skills_val.strip() if skills_val and skills_val.strip() else None
+    if skills_val is not None:
+        student.skills = skills_val.strip() if skills_val.strip() else None
 
     year_val = request.form.get("year")
-    student.year = int(year_val) if year_val and str(year_val).strip() else None
+    if year_val is not None:
+        student.year = int(year_val) if year_val.strip() else None
 
     cgpa_val = request.form.get("cgpa")
-    student.cgpa = float(cgpa_val) if cgpa_val and str(cgpa_val).strip() else None
+    if cgpa_val is not None:
+        student.cgpa = float(cgpa_val) if cgpa_val.strip() else None
 
     resume = request.files.get("resume")
     if resume and resume.filename:
