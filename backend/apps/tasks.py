@@ -3,7 +3,7 @@ import os
 import time
 from datetime import date, timedelta
 from celery.schedules import crontab
-from apps.extensions import mail
+from apps.extensions import mail, db
 from apps.celery_workers import celery
 from apps.models import Application, Placement, ApplicationStatus, StudentProfile, CompanyProfile, Role, User, PlacementDrive
 from flask_mail import Message
@@ -34,7 +34,14 @@ def send_interview_reminders():
             msg = Message(
                 subject="Interview Reminder",
                 recipients=[student_email],
-                body=f"You have an interview scheduled for the role of {app.drive.job_title} at {app.drive.company.company_name} tomorrow!"
+                body=f"""Dear {app.student.user.name},
+
+You have an interview scheduled for the role of {app.drive.job_title} at {app.drive.company.company_name} tomorrow!
+
+Time: {app.interview_date.strftime('%I:%M %p')}
+
+All the best for your interview!
+"""
             )
             mail.send(msg)
 
@@ -51,7 +58,7 @@ def generate_monthly_report():
     year = date.today().year
     total_drives = PlacementDrive.query.count()
     total_applications = Application.query.count()
-    total_placements = Placement.query.count()
+    total_placements = db.session.query(Application.student_id).filter_by(status=ApplicationStatus.PLACED).distinct().count()
 
     html = f"""
     <h1>Monthly Placement Report For: {month} {year}</h1>

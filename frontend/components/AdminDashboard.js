@@ -48,8 +48,8 @@ const AdminDashboard = {
         new Chart(document.getElementById('drivesChart'), {
           type: 'pie',
           data: {
-            labels: ['Approved', 'Rejected', 'Closed'],
-            datasets: [{ data: [data.drives.approved, data.drives.rejected, data.drives.closed], backgroundColor: ['#28a745', '#dc3545', '#6c757d'] }]
+            labels: ['Approved', 'Pending', 'Rejected', 'Closed'],
+            datasets: [{ data: [data.drives.approved, data.drives.pending, data.drives.rejected, data.drives.closed], backgroundColor: ['#28a745', '#ffc107', '#dc3545', '#6c757d'] }]
           },
           options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
         });

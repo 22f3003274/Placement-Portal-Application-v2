@@ -28,13 +28,14 @@ def chart_stats():
             "blacklisted": User.query.filter_by(role=Role.STUDENT, is_blacklisted=True).count()
         },
         "companies": {
-            "approved": CompanyProfile.query.filter_by(approval_status=ApprovalStatus.APPROVED).count(),
-            "pending": CompanyProfile.query.filter_by(approval_status=ApprovalStatus.PENDING).count(),
-            "blacklisted": CompanyProfile.query.filter_by(approval_status=ApprovalStatus.BLACKLISTED).count(),
-            "rejected": CompanyProfile.query.filter_by(approval_status=ApprovalStatus.REJECTED).count()
+            "approved": CompanyProfile.query.join(User).filter(CompanyProfile.approval_status==ApprovalStatus.APPROVED, User.is_blacklisted==False).count(),
+            "pending": CompanyProfile.query.join(User).filter(CompanyProfile.approval_status==ApprovalStatus.PENDING, User.is_blacklisted==False).count(),
+            "blacklisted": CompanyProfile.query.join(User).filter(User.is_blacklisted==True).count(),
+            "rejected": CompanyProfile.query.join(User).filter(CompanyProfile.approval_status==ApprovalStatus.REJECTED, User.is_blacklisted==False).count()
         },
         "drives": {
             "approved": PlacementDrive.query.filter_by(status=DriveStatus.APPROVED).count(),
+            "pending": PlacementDrive.query.filter_by(status=DriveStatus.PENDING).count(),
             "rejected": PlacementDrive.query.filter_by(status=DriveStatus.REJECTED).count(),
             "closed": PlacementDrive.query.filter_by(status=DriveStatus.CLOSED).count()
         },
