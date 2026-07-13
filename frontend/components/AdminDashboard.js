@@ -22,7 +22,7 @@ const AdminDashboard = {
     chartData(data) {
       if (!data) return;
       this.$nextTick(() => {
-        ['studentsChart', 'companiesChart', 'drivesChart'].forEach(id => {
+        ['studentsChart', 'companiesChart', 'drivesChart', 'placementsChart'].forEach(id => {
           const existing = Chart.getChart(id);
           if (existing) existing.destroy();
         });
@@ -52,6 +52,26 @@ const AdminDashboard = {
             datasets: [{ data: [data.drives.approved, data.drives.rejected, data.drives.closed], backgroundColor: ['#28a745', '#dc3545', '#6c757d'] }]
           },
           options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+        });
+
+        const totalStudents = data.students.active + data.students.blacklisted;
+        new Chart(document.getElementById('placementsChart'), {
+          type: 'bar',
+          data: {
+            labels: ['Placed', 'Offer', 'Ongoing'],
+            datasets: [{ 
+              label: 'Students',
+              data: [data.placements.placed, data.placements.offer, data.placements.ongoing],
+              backgroundColor: ['#28a745', '#17a2b8', '#ffc107']
+            }]
+          },
+          options: { 
+            indexAxis: 'y', 
+            responsive: true, 
+            maintainAspectRatio: false, 
+            plugins: { legend: { display: false } },
+            scales: { x: { beginAtZero: true, max: totalStudents } }
+          }
         });
       });
     },

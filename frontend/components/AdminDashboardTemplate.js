@@ -88,6 +88,19 @@ const adminDashboardTemplate = `
             </div>
           </div>
         </div>
+
+        <div class="row g-4 mb-5">
+          <div class="col-md-12">
+            <div class="card shadow-sm">
+              <div class="card-body">
+                <h6 class="card-title text-muted text-center mb-3">Placements Overview</h6>
+                <div style="position:relative; height:150px;">
+                  <canvas id="placementsChart"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div v-if="tab === 'students'">

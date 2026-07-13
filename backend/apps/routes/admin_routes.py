@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from sqlalchemy import func
 from apps.extensions import db, cache
-from apps.models import User,Role,StudentProfile,CompanyProfile,PlacementDrive,Application,ApprovalStatus,DriveStatus,Placement
+from apps.models import User,Role,StudentProfile,CompanyProfile,PlacementDrive,Application,ApprovalStatus,DriveStatus,Placement,ApplicationStatus
 from apps.routes.auth_routes import admin_required
 
 
@@ -37,6 +37,11 @@ def chart_stats():
             "approved": PlacementDrive.query.filter_by(status=DriveStatus.APPROVED).count(),
             "rejected": PlacementDrive.query.filter_by(status=DriveStatus.REJECTED).count(),
             "closed": PlacementDrive.query.filter_by(status=DriveStatus.CLOSED).count()
+        },
+        "placements": {
+            "placed": db.session.query(Application.student_id).filter_by(status=ApplicationStatus.PLACED).distinct().count(),
+            "offer": db.session.query(Application.student_id).filter_by(status=ApplicationStatus.OFFER).distinct().count(),
+            "ongoing": db.session.query(Application.student_id).filter(Application.status.in_([ApplicationStatus.APPLIED, ApplicationStatus.SHORTLISTED, ApplicationStatus.INTERVIEW])).distinct().count()
         }
     })
 
