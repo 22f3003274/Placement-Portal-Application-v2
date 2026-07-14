@@ -264,8 +264,9 @@ Placement-Portal-Application-v2
 |       |-- StudentDashboard.js
 |       |-- StudentDashboardTemplate.js
 |
-|-- README.md
-└── 22f3003274_project_report.pdf
+|-- api.yaml
+|-- Placement Portal Application v2- Project Report.pdf
+└── README.md
 ```
 
 ---
@@ -274,6 +275,7 @@ Placement-Portal-Application-v2
 
 Possible improvements for future versions:
 
+- Eligibility(CGPA, Branches, etc) validation before applying to drive 
 - Implementing ATS-style resume screener
 - Real-time WebSockets for instant interview notifications
 - Integration with external calendar APIs (Google Calendar)
@@ -286,8 +288,14 @@ Possible improvements for future versions:
 B.Tech - Electrical and Electronics Engineering  
 IIIT Bhubaneswar
 
+Acces the video demonstration of the project here:
+[Link to Video Demonstration](https://drive.google.com/file/d/1ryPRY7kBVydewuiX1C95IeN4lE2AWodF/view?usp=sharing)
+
+Acces the project report here: [Link to Project Report](https://drive.google.com/file/d/15RrCfz2iro0hCeyBGVxMJ0JiOmG9JVnq/view?usp=sharing)
+
+
 ---
 
 ## License
 
-This project is developed for academic purposes as part of the MAD-2 course.
+This project is developed for academic purposes as part of the MAD-2 course of IIT Madras.
