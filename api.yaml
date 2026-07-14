@@ -1,0 +1,61 @@
+api_definition:
+  project: Placement Portal Application v2
+  base_url: http://localhost:5000/api
+
+  routes:
+    # authorization endpoints
+    - path: /auth/login
+      method: POST
+    - path: /auth/register/student
+      method: POST
+    - path: /auth/register/company
+      method: POST
+
+    # admin endpoints
+    - path: /admin/stats
+      method: GET
+    - path: /admin/chart-stats
+      method: GET
+    - path: /admin/students
+      method: GET
+    - path: /admin/companies
+      method: GET
+    - path: /admin/drives
+      method: GET
+    - path: /admin/applications
+      method: GET
+    - path: /admin/companies/<company_id>/status
+      method: POST
+    - path: /admin/drives/<drive_id>/status
+      method: POST
+    - path: /admin/users/<user_id>/toggle-blacklist
+      method: POST
+
+    # student endpoints
+    - path: /student/dashboard
+      method: GET
+    - path: /student/apply/<drive_id>
+      method: POST
+    - path: /student/profile/update
+      method: PATCH
+    - path: /student/export-history
+      method: POST
+    - path: /student/task-status/<task_id>
+      method: GET
+
+    # company endpoints
+    - path: /company/dashboard
+      method: GET
+    - path: /company/drive/create
+      method: POST
+    - path: /company/drive/close/<drive_id>
+      method: POST
+    - path: /company/drive/<drive_id>/applications
+      method: GET
+    - path: /company/application/<app_id>/status
+      method: POST
+    - path: /company/export-history
+      method: POST
+    - path: /company/task-status/<task_id>
+      method: GET
+      
